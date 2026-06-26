@@ -50,13 +50,30 @@ async function runAudit() {
   state.files.forEach((f) => fd.append("files", f));
   let payload;
   try {
-    const r = await fetch("/api/audit", { method: "POST", body: fd });
-    payload = await r.json();
+    // Async job pattern: submit -> poll. Avoids gateway 504s on long audits
+    // (AgentBox closes long-open connections). See web/server.py.
+    const sub = await fetch("/api/jobs", { method: "POST", body: fd });
+    const { job_id } = await sub.json();
+    payload = await pollJob(job_id);
   } catch {
-    payload = await loadSample(); // offline demo path
+    payload = await loadSample(); // offline / static-hosting fallback
   }
   await setStage("finish");
   render(normalize(payload));
+}
+
+// Poll a job until it finishes. Audits can take 30-120s, so poll patiently.
+async function pollJob(jobId, { intervalMs = 2000, timeoutMs = 600000 } = {}) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const r = await fetch(`/api/jobs/${jobId}`);
+    if (!r.ok) throw new Error("job not found");
+    const j = await r.json();
+    if (j.status === "done") return j.result;
+    if (j.status === "error") throw new Error(j.error || "audit failed");
+    await sleep(intervalMs);
+  }
+  throw new Error("audit timed out");
 }
 
 function normalize(p) {

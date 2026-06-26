@@ -1,0 +1,24 @@
+# keep the image small and free of local-only artifacts / secrets
+.git
+.gitignore
+.env
+*.env
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+
+# local audit outputs and scratch test data (not needed in the image)
+audit_out/
+audit_mine/
+audit_usd/
+audit_realworld/
+data_mine/
+data_usd/
+data_realworld/
+
+# docs / CI
+README.md
+web/README.md
+.github/

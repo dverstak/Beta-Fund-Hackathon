@@ -1,0 +1,81 @@
+name: Build & push AgentBox image
+
+# Publishes the container image AgentBox pulls (GMI CE path).
+# Triggers: version tags (v*) or manual dispatch.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/contractor-tax-auditor
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Smoke tests (boots with no keys; async contract)
+        run: python -m pytest tests/ -q
+
+      # Build the image and verify it serves /api/health before we publish.
+      - name: Build image (no push)
+        run: docker build -t auditor:ci .
+      - name: Container healthcheck
+        run: |
+          docker run -d --name auditor_ci -p 8080:8080 auditor:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/api/health; then echo "OK"; exit 0; fi
+            sleep 1
+          done
+          echo "health never came up"; docker logs auditor_ci; exit 1
+      - name: Stop container
+        if: always()
+        run: docker rm -f auditor_ci || true
+
+  build-push:
+    needs: test               # never publish an image that failed the smoke gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write          # required to push to GHCR
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image metadata (tags/labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=sha
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+# After the first push, make the GHCR package PUBLIC (Packages -> settings)
+# so AgentBox can pull it without credentials, then register the image
+# ghcr.io/<owner>/contractor-tax-auditor:latest in the AgentBox wizard
+# (Networking: external 443 -> internal 8080; enable MaaS + select models).
