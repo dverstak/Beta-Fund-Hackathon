@@ -1,2 +1,0 @@
-source,profile,date,vendor,description,kind,amount,schedule_c_line,deductible_pct,deductible_amount,confidence,risk_level,flags
-receipt_shell_gas.jpg,receipt,2006-06-21,Shell,6.736 gallons of unleaded fuel,expense,20.0,Line 9 - Car and truck expenses,100.0,20.0,0.95,high,Audit-sensitive category: Vehicle expense; Date outside tax year 2025

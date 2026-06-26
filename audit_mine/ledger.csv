@@ -1,2 +1,0 @@
-source,profile,date,vendor,description,kind,amount,schedule_c_line,deductible_pct,deductible_amount,confidence,risk_level,flags
-receipts.webp,receipt,2007-01-20,PC Market of Choice,Bananas,expense,0.32,Line NONDEDUCTIBLE - Non-deductible / personal,0.0,0.0,0.95,high,Personal / non-deductible expense claimed; Date outside tax year 2025
