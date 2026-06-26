@@ -3,111 +3,118 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ShoeboxIQ — Contractor Tax &amp; Deduction Auditor</title>
+  <title>Audit AI — Schedule C Compliance Ledger</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <!-- ░░ TOP BAR ░░ -->
-  <header class="topbar">
+  <!-- ░░ MASTHEAD ░░ -->
+  <header class="masthead">
     <div class="brand">
-      <div class="brand-mark">▦</div>
-      <div>
-        <div class="brand-name">Shoebox<span>IQ</span></div>
-        <div class="brand-sub">Independent Contractor Tax &amp; Deduction Auditor</div>
+      <div class="brand-seal">
+        <span class="seal-mark">§C</span>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">Audit<span>&nbsp;AI</span></div>
+        <div class="brand-tag">Schedule&nbsp;C compliance, from the shoebox up</div>
       </div>
     </div>
-    <div class="topbar-right">
-      <label class="year-select">
-        Tax year
-        <select id="taxYear">
-          <option>2025</option>
-          <option>2024</option>
-          <option>2023</option>
+    <div class="masthead-meta">
+      <div class="form-no">
+        <span class="fn-label">Tax&nbsp;year</span>
+        <select id="taxYear" class="fn-select">
+          <option>2025</option><option>2024</option><option>2023</option>
         </select>
-      </label>
-      <span class="pill pill-gmi" id="pillBackend" title="Inference engine">
-        <span class="dot"></span> GMI Cloud
-      </span>
-      <span class="pill pill-respan" id="pillRespan" title="Observability">
-        <span class="dot"></span> Respan
-      </span>
-      <span class="pill pill-warn" title="Outputs are for accountant review only">
-        Not tax advice
-      </span>
+      </div>
+      <span class="stamp-chip" id="pillBackend"><i></i>GMI Cloud</span>
+      <span class="stamp-chip" id="pillRespan"><i></i>Respan</span>
+      <span class="stamp-chip review">For accountant review</span>
     </div>
   </header>
 
   <main id="app">
-    <!-- ░░ UPLOAD / INTAKE STATE ░░ -->
+    <!-- ░░ INTAKE ░░ -->
     <section id="intake" class="intake">
-      <div class="intake-hero">
-        <h1>Turn the <span class="hl">digital shoebox</span> into an audit-ready ledger.</h1>
-        <p>Drop a year of chaos — 1099-NEC forms, receipt photos, bank-statement CSVs.
-           The agent extracts, maps every expense to its exact Schedule&nbsp;C line,
-           flags audit triggers, and computes your self-employment tax.</p>
+      <div class="form-title">
+        <span class="ft-eyebrow">Form 1040 · Schedule C · Profit or Loss From Business</span>
+        <h1>Hand us the shoebox.<br/>Get back a <em>Schedule&nbsp;C</em>.</h1>
+        <p>A year of 1099-NEC forms, receipt photos, and bank-statement CSVs goes in.
+           Every expense comes out mapped to its exact IRS line, audit triggers flagged,
+           self-employment tax tallied.</p>
       </div>
 
-      <div id="dropzone" class="dropzone">
+      <div id="dropzone" class="attach-box">
         <input id="fileInput" type="file" multiple hidden
                accept=".png,.jpg,.jpeg,.pdf,.csv,.xlsx" />
-        <div class="dz-icon">⬆</div>
-        <div class="dz-title">Drop your documents here</div>
-        <div class="dz-sub">PNG &middot; JPG &middot; PDF &middot; CSV &middot; XLSX — or click to browse</div>
-        <div id="fileChips" class="file-chips"></div>
-        <div class="dz-actions">
-          <button id="runBtn" class="btn btn-primary">Run audit</button>
-          <button id="demoBtn" class="btn btn-ghost">Use sample shoebox</button>
+        <div class="attach-corner tl">ATTACH</div>
+        <div class="attach-corner br">1099-NEC · RECEIPTS · STATEMENTS</div>
+        <div class="attach-inner">
+          <div class="attach-headline">Drop documents here</div>
+          <div class="attach-sub">PNG · JPG · PDF · CSV · XLSX &nbsp;—&nbsp; or click to browse</div>
+          <div id="fileChips" class="file-chips"></div>
+          <div class="attach-actions">
+            <button id="runBtn" class="btn btn-primary">Run audit →</button>
+            <button id="demoBtn" class="btn btn-ghost">Use sample shoebox</button>
+          </div>
         </div>
       </div>
 
-      <!-- pipeline stepper, shown while running -->
-      <div id="pipeline" class="pipeline hidden">
-        <div class="step" data-step="ingest">
-          <div class="step-dot"></div><div class="step-label">Ingest</div>
-          <div class="step-desc">Discover &amp; classify files</div>
-        </div>
-        <div class="step" data-step="extract">
-          <div class="step-dot"></div><div class="step-label">Vision extract</div>
-          <div class="step-desc">Read receipts &amp; forms → JSON</div>
-        </div>
-        <div class="step" data-step="categorize">
-          <div class="step-dot"></div><div class="step-label">Categorize</div>
-          <div class="step-desc">Map to Schedule C lines</div>
-        </div>
-        <div class="step" data-step="risk">
-          <div class="step-dot"></div><div class="step-label">Risk flag</div>
-          <div class="step-desc">Audit-trigger heuristics</div>
-        </div>
-        <div class="step" data-step="ledger">
-          <div class="step-dot"></div><div class="step-label">Ledger</div>
-          <div class="step-desc">Compile &amp; export</div>
-        </div>
-      </div>
+      <!-- pipeline: a 5-line form being filled out -->
+      <ol id="pipeline" class="pipeline hidden">
+        <li class="step" data-step="ingest"><span class="st-n">1</span>
+          <span class="st-name">Ingest</span><span class="st-leader"></span>
+          <span class="st-desc">discover &amp; classify files</span></li>
+        <li class="step" data-step="extract"><span class="st-n">2</span>
+          <span class="st-name">Vision extract</span><span class="st-leader"></span>
+          <span class="st-desc">read receipts &amp; forms → JSON</span></li>
+        <li class="step" data-step="categorize"><span class="st-n">3</span>
+          <span class="st-name">Categorize</span><span class="st-leader"></span>
+          <span class="st-desc">map to Schedule C lines</span></li>
+        <li class="step" data-step="risk"><span class="st-n">4</span>
+          <span class="st-name">Risk flag</span><span class="st-leader"></span>
+          <span class="st-desc">apply audit-trigger rules</span></li>
+        <li class="step" data-step="ledger"><span class="st-n">5</span>
+          <span class="st-name">Ledger</span><span class="st-leader"></span>
+          <span class="st-desc">compile &amp; export</span></li>
+      </ol>
     </section>
 
-    <!-- ░░ RESULTS STATE ░░ -->
+    <!-- ░░ RESULTS ░░ -->
     <section id="results" class="results hidden">
-      <!-- KPI ROW -->
+      <!-- form header band -->
+      <div class="ledger-head">
+        <div class="lh-left">
+          <div class="lh-form">SCHEDULE C-AI</div>
+          <div class="lh-sub">Profit or Loss From Business · Sole Proprietorship</div>
+        </div>
+        <div class="lh-right">
+          <span class="lh-omb">Tax year <strong id="lhYear">2025</strong></span>
+          <span class="lh-src" id="lhSource"></span>
+        </div>
+      </div>
+
+      <!-- KPI form-field boxes -->
       <div class="kpi-row" id="kpiRow"></div>
 
       <div class="grid">
-        <!-- LEFT / MAIN COLUMN -->
         <div class="col-main">
-          <div class="card">
-            <div class="card-head">
-              <h2>Schedule C — Part II expense lines</h2>
-              <span class="muted" id="scLineCount"></span>
+          <!-- Schedule C as a living form -->
+          <section class="sheet">
+            <div class="sheet-head">
+              <h2>Part&nbsp;II — Expenses</h2>
+              <span class="sheet-note" id="scLineCount"></span>
             </div>
-            <div id="scLines" class="sc-lines"></div>
-          </div>
+            <div id="scLines" class="formlines"></div>
+          </section>
 
-          <div class="card">
-            <div class="card-head">
-              <h2>Line items</h2>
-              <div class="filters">
-                <input id="search" class="search" placeholder="Search vendor / description…" />
+          <!-- green-bar ledger -->
+          <section class="sheet">
+            <div class="sheet-head">
+              <h2>General ledger</h2>
+              <div class="ledger-controls">
+                <input id="search" class="search" placeholder="Find vendor or description…" />
                 <div class="seg" id="filterSeg">
                   <button data-f="all" class="active">All</button>
                   <button data-f="income">Income</button>
@@ -116,54 +123,48 @@
                 </div>
               </div>
             </div>
-            <div class="table-wrap">
+            <div class="greenbar">
               <table class="ledger-table">
-                <thead>
-                  <tr>
-                    <th>Date</th><th>Vendor</th><th>Schedule C line</th>
-                    <th class="num">Amount</th><th class="num">Deductible</th>
-                    <th>Conf.</th><th>Risk</th>
-                  </tr>
-                </thead>
+                <thead><tr>
+                  <th class="g-date">Date</th><th>Vendor &amp; memo</th>
+                  <th>Sch C line</th><th class="num">Amount</th>
+                  <th class="num">Deductible</th><th class="g-conf">Conf.</th><th>Status</th>
+                </tr></thead>
                 <tbody id="ledgerBody"></tbody>
               </table>
             </div>
-          </div>
+          </section>
         </div>
 
-        <!-- RIGHT RAIL -->
+        <!-- right column -->
         <aside class="col-rail">
-          <div class="card card-se">
-            <div class="card-head"><h2>Self-employment tax</h2><span class="muted">Schedule SE</span></div>
+          <section class="sheet sheet-se">
+            <div class="sheet-head"><h2>Self-employment tax</h2><span class="sheet-note">Schedule SE</span></div>
             <div id="seCalc" class="se-calc"></div>
-          </div>
+          </section>
 
-          <div class="card">
-            <div class="card-head">
-              <h2>Audit risk review</h2>
-              <span class="badge badge-high" id="flaggedCount"></span>
-            </div>
+          <section class="sheet">
+            <div class="sheet-head"><h2>Flagged for review</h2><span class="count-tag" id="flaggedCount"></span></div>
             <div id="flagged" class="flagged-list"></div>
-          </div>
+          </section>
 
-          <div class="card card-respan">
-            <div class="card-head"><h2>Respan telemetry</h2><span class="muted">cost / document</span></div>
+          <section class="sheet sheet-respan">
+            <div class="sheet-head"><h2>Respan telemetry</h2><span class="sheet-note">cost / document</span></div>
             <div id="respanPanel" class="respan-panel"></div>
-          </div>
+          </section>
 
-          <div class="card card-export">
-            <div class="card-head"><h2>Export</h2></div>
+          <section class="sheet">
+            <div class="sheet-head"><h2>Export</h2></div>
             <div class="export-btns">
-              <button class="btn btn-out" data-export="json">Ledger JSON</button>
-              <button class="btn btn-out" data-export="csv">Ledger CSV</button>
-              <button class="btn btn-out" data-export="md">Audit report</button>
+              <button class="btn btn-out" data-export="json">Ledger · JSON</button>
+              <button class="btn btn-out" data-export="csv">Ledger · CSV</button>
+              <button class="btn btn-out" data-export="md">Audit report · MD</button>
             </div>
-            <button id="newAuditBtn" class="btn btn-ghost full">← New audit</button>
-          </div>
+            <button id="newAuditBtn" class="btn btn-ghost full">← Start a new audit</button>
+          </section>
         </aside>
       </div>
-      <p class="disclaimer">Generated by the Independent Contractor Tax &amp; Deduction Auditor.
-        Outputs are for accountant review — <strong>not tax advice</strong>.</p>
+      <p class="disclaimer">Prepared by Audit AI for accountant review. <strong>Not tax advice.</strong></p>
     </section>
   </main>
 

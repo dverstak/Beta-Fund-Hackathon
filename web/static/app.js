@@ -104,42 +104,52 @@ function render(data) {
 function renderKPIs() {
   const s = state.data.ledger.summary;
   const se = computeSE(s.estimated_net_profit_schedule_c);
+  $("#lhYear").textContent = state.data.ledger.tax_year;
+  $("#lhSource").textContent =
+    state.data.source === "live" ? "live audit" : "sample data";
   const cards = [
-    ["k-income", "Gross receipts", fmt0(s.gross_receipts), "1099-NEC + income"],
-    ["k-deduct", "Total deductible", fmt0(s.total_deductible),
+    ["k-income", "Line 1", "Gross receipts", fmt0(s.gross_receipts), "1099-NEC + income"],
+    ["k-deduct", "Line 28", "Total deductible", fmt0(s.total_deductible),
       `${fmt0(s.total_expenses_claimed)} claimed`],
-    ["k-net", "Net profit", fmt0(s.estimated_net_profit_schedule_c), "Schedule C bottom line"],
-    ["k-tax", "Est. SE tax", fmt0(se.tax), "15.3% — Schedule SE"],
+    ["k-net", "Line 31", "Net profit", fmt0(s.estimated_net_profit_schedule_c), "business bottom line"],
+    ["k-tax", "Sch SE", "Self-employment tax", fmt0(se.tax), "15.3% est."],
   ];
-  $("#kpiRow").innerHTML = cards.map(([c, l, v, sub]) => `
+  $("#kpiRow").innerHTML = cards.map(([c, ref, l, v, sub]) => `
     <div class="kpi ${c}">
+      <span class="kpi-ref">${ref}</span>
       <div class="kpi-label">${l}</div>
       <div class="kpi-value">${v}</div>
       <div class="kpi-sub">${sub}</div>
     </div>`).join("");
 }
 
+// Sort by IRS line order (how a real Schedule C reads); non-deductible last.
+function lineOrder(code) {
+  if (code === "NONDEDUCTIBLE") return 1e6;
+  return parseInt(code, 10) * 10 + (code.replace(/\d/g, "").charCodeAt(0) || 0);
+}
+
 function renderScheduleC() {
   const lines = Object.entries(state.data.ledger.schedule_c_lines)
     .map(([k, v]) => ({ code: k.replace("Line ", ""), ...v }))
-    .sort((a, b) => b.claimed - a.claimed);
-  const max = Math.max(...lines.map((l) => l.claimed), 1);
-  $("#scLineCount").textContent = `${lines.length} lines`;
+    .sort((a, b) => lineOrder(a.code) - lineOrder(b.code));
+  $("#scLineCount").textContent = `${lines.length} lines · Form 1040`;
   $("#scLines").innerHTML = lines.map((l) => {
     const nd = l.deductible === 0;
+    const limited = !nd && Math.abs(l.deductible - l.claimed) > 0.005;
+    const codeDisp = l.code === "NONDEDUCTIBLE" ? "N/D" : l.code;
+    const amt = nd
+      ? `${fmt(l.claimed)} <span class="struck">disallowed</span>`
+      : limited
+        ? `${fmt(l.deductible)} <span class="struck">${fmt(l.claimed)}</span>`
+        : fmt(l.deductible);
     return `
-    <div class="sc-line">
-      <span class="sc-code">${l.code}</span>
-      <div class="sc-bar-wrap">
-        <div class="sc-bar-top">
-          <span class="sc-bar-label">${l.label}</span>
-          <span class="muted">${l.count} item${l.count > 1 ? "s" : ""}</span>
-        </div>
-        <div class="sc-bar-track">
-          <div class="sc-bar-fill ${nd ? "nd" : ""}" style="width:${(l.claimed / max) * 100}%"></div>
-        </div>
-      </div>
-      <div class="sc-amt">${fmt(l.deductible)}<small>of ${fmt(l.claimed)}</small></div>
+    <div class="formline ${nd ? "is-nd" : ""}">
+      <span class="fl-code ${nd ? "nd" : ""}" title="${l.code === "NONDEDUCTIBLE" ? "Non-deductible" : "Schedule C Line " + l.code}">${codeDisp}</span>
+      <span class="fl-label">${l.label}</span>
+      <span class="fl-count">${l.count}×</span>
+      <span class="fl-leader"></span>
+      <span class="fl-amt">${amt}</span>
     </div>`;
   }).join("");
 }
@@ -154,32 +164,41 @@ function renderTable() {
     if (q && !`${it.vendor} ${it.description}`.toLowerCase().includes(q)) return false;
     return true;
   });
-  $("#ledgerBody").innerHTML = rows.map((it, i) => {
+  $("#ledgerBody").innerHTML = rows.map((it) => {
     const idx = items.indexOf(it);
-    const risk = it.kind === "income" ? "income" : it.risk_level;
-    const amtCls = it.kind === "income" ? "income-amt" : "";
-    const ded = it.kind === "income" ? "—" : fmt(it.deductible_amount);
-    const conf = it.kind === "income" ? "" :
-      `<span class="conf-bar"><span class="conf-fill" style="width:${(it.confidence || 0) * 100}%"></span></span>`;
+    const isIncome = it.kind === "income";
+    const status = isIncome ? "income" : it.risk_level;
+    const statusLabel = isIncome ? "income" : it.risk_level;
+    const amtCls = isIncome ? "income-amt" : "";
+    const ded = isIncome ? "—" : fmt(it.deductible_amount);
+    const conf = isIncome ? "" : confDots(it.confidence || 0);
+    const line = isIncome ? "L1 · gross receipts" : (it.schedule_c_line || "—");
     return `<tr data-i="${idx}">
-      <td>${it.date || "—"}</td>
+      <td class="cell-date">${it.date || "—"}</td>
       <td><div class="cell-vendor">${it.vendor || "—"}</div>
           <div class="cell-desc">${it.description || ""}</div></td>
-      <td><span class="sc-tag">${it.kind === "income" ? "Income · 1040 Sch C L1" : (it.schedule_c_line || "—")}</span></td>
+      <td><span class="sc-tag">${line}</span></td>
       <td class="num ${amtCls}">${fmt(it.amount)}</td>
       <td class="num">${ded}</td>
       <td>${conf}</td>
-      <td><span class="risk risk-${risk}">${it.kind === "income" ? "income" : it.risk_level}</span></td>
+      <td><span class="stat stat-${status}">${statusLabel}</span></td>
     </tr>`;
-  }).join("") || `<tr><td colspan="7" style="text-align:center;color:var(--txt-3);padding:30px">No matching items.</td></tr>`;
+  }).join("") || `<tr><td colspan="7" style="text-align:center;color:var(--ink-3);padding:30px">No matching items.</td></tr>`;
   $$("#ledgerBody tr[data-i]").forEach((tr) =>
     tr.addEventListener("click", () => openDrawer(items[+tr.dataset.i])));
+}
+
+function confDots(c) {
+  const filled = Math.round(Math.max(0, Math.min(1, c)) * 5);
+  return `<span class="conf-dots" title="${(c * 100).toFixed(0)}% confidence">` +
+    "●".repeat(filled) + `<span class="o">${"●".repeat(5 - filled)}</span></span>`;
 }
 
 function renderSE() {
   const s = state.data.ledger.summary;
   const se = computeSE(s.estimated_net_profit_schedule_c);
-  const row = (l, v, cls = "") => `<div class="se-row ${cls}"><span class="lbl">${l}</span><span class="val">${v}</span></div>`;
+  const row = (l, v, cls = "") =>
+    `<div class="se-row ${cls}"><span class="lbl">${l}</span><span class="ldr"></span><span class="val">${v}</span></div>`;
   $("#seCalc").innerHTML =
     row("Net profit (Schedule C)", fmt(s.estimated_net_profit_schedule_c)) +
     row("× 92.35% net earnings", fmt(se.base)) +
@@ -205,7 +224,7 @@ function renderFlagged() {
       <div class="flag-line">${it.schedule_c_line || it.description || ""}</div>
       <ul class="flag-reasons">${it.flags.map((f) => `<li>${f}</li>`).join("")}</ul>
     </div>`).join("") ||
-    `<p class="muted">No items flagged — clean ledger.</p>`;
+    `<p class="respan-foot">No items flagged — clean ledger.</p>`;
 }
 
 function renderRespan() {
@@ -213,7 +232,7 @@ function renderRespan() {
   const panel = $("#respanPanel");
   const tel = r.respan_telemetry || {};
   $("#pillRespan").classList.toggle("off", !tel.enabled);
-  if (!r.calls) { panel.innerHTML = `<p class="muted">No telemetry for this run.</p>`; return; }
+  if (!r.calls) { panel.innerHTML = `<p class="respan-foot">No telemetry for this run.</p>`; return; }
   const profiles = Object.entries(r.by_profile || {});
   const maxCost = Math.max(...profiles.map(([, v]) => v.cost_usd), 1e-9);
   panel.innerHTML = `
@@ -230,21 +249,21 @@ function renderRespan() {
           <span class="cost">$${v.cost_usd.toFixed(4)}</span>
         </div>`).join("")}
     </div>
-    <div class="muted" style="text-align:center">
-      Total ${fmt(r.total_cost_usd).replace("$", "$")} · telemetry ${tel.enabled ? "ON" : "off"}
-      ${tel.logs_sent ? `· ${tel.logs_sent} logs sent` : ""}
+    <div class="respan-foot">
+      Total ${fmt(r.total_cost_usd)} · telemetry ${tel.enabled ? "ON" : "off"}${tel.logs_sent ? ` · ${tel.logs_sent} logs sent` : ""}
     </div>`;
 }
 
 /* ─────────────── detail drawer ─────────────── */
 function openDrawer(it) {
   const isIncome = it.kind === "income";
-  const dk = (k, v) => `<div class="dk-row"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  const dk = (k, v) => `<div class="dk-row"><span class="k">${k}</span><span class="ldr"></span><span class="v">${v}</span></div>`;
+  const status = isIncome ? "income" : it.risk_level;
   $("#drawerPanel").innerHTML = `
     <div class="drawer-head">
       <div>
         <div class="drawer-vendor">${it.vendor || "—"}</div>
-        <span class="risk risk-${isIncome ? "income" : it.risk_level}">${isIncome ? "income" : it.risk_level + " risk"}</span>
+        <span class="stat stat-${status}">${isIncome ? "income" : it.risk_level + " risk"}</span>
       </div>
       <button class="drawer-close" data-close>×</button>
     </div>
@@ -260,7 +279,7 @@ function openDrawer(it) {
       ${it.payment_method ? dk("Payment", it.payment_method) : ""}
     </div>
     ${it.rationale ? `<div class="rationale"><span class="lbl">Agent rationale</span>${it.rationale}</div>` : ""}
-    ${(it.flags || []).length ? `<div class="drawer-flags"><div class="card-head"><h2>Audit flags</h2></div>
+    ${(it.flags || []).length ? `<div class="drawer-flags"><div class="sheet-head"><h2>Audit flags</h2></div>
       <ul class="flag-reasons">${it.flags.map((f) => `<li>${f}</li>`).join("")}</ul></div>` : ""}
     <div class="rationale" style="margin-top:14px"><span class="lbl">Extracted data</span>
       <div class="raw-json">${escapeJSON(it.raw || {})}</div></div>`;
