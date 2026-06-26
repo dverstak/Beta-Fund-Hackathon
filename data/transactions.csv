@@ -1,0 +1,14 @@
+date,vendor,description,amount,type,payment
+2025-01-15,Adobe,Creative Cloud subscription,59.99,expense,card
+2025-02-03,United Airlines,Flight to client onsite SFO,412.40,expense,card
+2025-02-03,Hyatt,Hotel 2 nights client trip,388.00,expense,card
+2025-02-20,Steakhouse 55,Client dinner,240.00,expense,card
+2025-03-01,WeWork,Coworking desk monthly,350.00,expense,card
+2025-03-12,Best Buy,Laptop for business,2399.00,expense,card
+2025-03-30,Nordstrom,New suit,650.00,expense,card
+2025-04-05,Acme Corp,Project milestone payment,8500.00,income,ach
+2025-04-18,Shell,Gas - client site visits,300.00,expense,cash
+2025-05-02,LegalZoom,LLC filing + legal,299.00,expense,card
+2025-05-15,Staples,Office supplies,84.25,expense,card
+2025-06-01,State Farm,Business liability insurance,540.00,expense,card
+2024-12-28,Verizon,Phone bill (prior year),95.00,expense,card

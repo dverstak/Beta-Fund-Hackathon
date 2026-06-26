@@ -1,0 +1,6 @@
+# Core (required)
+openai>=1.40          # GMI Cloud / Respan OpenAI-compatible client
+
+# Optional
+openpyxl>=3.1         # only needed to ingest .xlsx spreadsheets
+pillow>=10.0          # only needed to generate demo sample images

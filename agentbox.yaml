@@ -1,0 +1,51 @@
+# AgentBox marketplace manifest
+# Distribution target: small-business owners & freelancers automating pre-tax bookkeeping.
+schema_version: "1.0"
+agent:
+  name: contractor-tax-deduction-auditor
+  display_name: "Independent Contractor Tax & Deduction Auditor"
+  version: "0.1.0"
+  track: "Workflow and Operations Agents"
+  summary: >
+    Autonomous worker that ingests transactional spreadsheets, 1099-NEC forms,
+    and receipt photos/PDFs, categorizes them per IRS Schedule C, flags
+    high-risk deductions, and compiles an accountant-ready compliance ledger.
+  category: "Finance & Bookkeeping"
+  audience: ["freelancers", "independent contractors", "small business owners", "bookkeepers"]
+  tags: ["taxes", "schedule-c", "1099", "deductions", "bookkeeping", "ocr"]
+
+capabilities:
+  - "Multimodal extraction from chaotic receipts & scanned tax forms"
+  - "IRS Schedule C line categorization"
+  - "High-risk deduction / audit-trigger flagging"
+  - "Accountant-ready ledger export (JSON, CSV, Markdown)"
+
+pipeline: [ingest, vision-extract, categorize, risk-flag, ledger]
+
+entrypoint:
+  type: cli
+  command: "python -m auditor.cli audit {input} --out {output}"
+  inputs:
+    input: { type: path, description: "Folder of spreadsheets, receipts, 1099s" }
+  outputs:
+    - ledger.json
+    - ledger.csv
+    - audit_report.md
+    - respan_metrics.json
+
+sponsor_tools:
+  gmi_cloud:
+    role: "Multimodal vision inference (receipt/PDF parsing)"
+    base_url: "https://api.gmi-serving.com/v1"
+    model_env: GMI_VISION_MODEL
+  respan:
+    role: "Per-document token & cost observability / AI gateway"
+    metric: "cost per document profile"
+  agentbox:
+    role: "Marketplace distribution to freelancers & SMBs"
+
+pricing_hint:
+  model: per-document
+  note: "Local Respan meter reports avg cost/doc; tune model via GMI_VISION_MODEL."
+
+disclaimer: "Outputs are for accountant review and are not tax advice."
