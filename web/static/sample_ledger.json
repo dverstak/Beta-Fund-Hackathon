@@ -1,0 +1,532 @@
+{
+  "tax_year": 2025,
+  "summary": {
+    "documents": 4,
+    "line_items": 16,
+    "gross_receipts": 51250.0,
+    "total_expenses_claimed": 6024.83,
+    "total_deductible": 5242.08,
+    "estimated_net_profit_schedule_c": 46007.92,
+    "flagged_items": 8,
+    "high_risk_items": 6
+  },
+  "schedule_c_lines": {
+    "Line 13": {
+      "label": "Depreciation / Section 179",
+      "count": 1,
+      "claimed": 2399.0,
+      "deductible": 2399.0
+    },
+    "Line 15": {
+      "label": "Insurance (other than health)",
+      "count": 1,
+      "claimed": 540.0,
+      "deductible": 540.0
+    },
+    "Line 17": {
+      "label": "Legal and professional services",
+      "count": 1,
+      "claimed": 299.0,
+      "deductible": 299.0
+    },
+    "Line 18": {
+      "label": "Office expense",
+      "count": 1,
+      "claimed": 59.99,
+      "deductible": 59.99
+    },
+    "Line 20b": {
+      "label": "Rent/lease - other business property",
+      "count": 1,
+      "claimed": 350.0,
+      "deductible": 350.0
+    },
+    "Line 22": {
+      "label": "Supplies",
+      "count": 2,
+      "claimed": 265.94,
+      "deductible": 265.94
+    },
+    "Line 24a": {
+      "label": "Travel",
+      "count": 2,
+      "claimed": 800.4,
+      "deductible": 800.4
+    },
+    "Line 24b": {
+      "label": "Deductible meals (50%)",
+      "count": 2,
+      "claimed": 265.5,
+      "deductible": 132.75
+    },
+    "Line 25": {
+      "label": "Utilities",
+      "count": 1,
+      "claimed": 95.0,
+      "deductible": 95.0
+    },
+    "Line 9": {
+      "label": "Car and truck expenses",
+      "count": 1,
+      "claimed": 300.0,
+      "deductible": 300.0
+    },
+    "Line NONDEDUCTIBLE": {
+      "label": "Non-deductible / personal",
+      "count": 1,
+      "claimed": 650.0,
+      "deductible": 0.0
+    }
+  },
+  "line_items": [
+    {
+      "source": "1099-nec_globex.png",
+      "profile": "form_1099nec",
+      "date": "2025-12-31",
+      "vendor": "Globex Consulting LLC",
+      "description": "1099-NEC nonemployee compensation (Box 1)",
+      "amount": 42750.0,
+      "kind": "income",
+      "payment_method": null,
+      "raw": {
+        "payer": "Globex Consulting LLC",
+        "box1_nonemployee_comp": 42750.0,
+        "box4_federal_tax_withheld": 0.0,
+        "tax_year": 2025
+      },
+      "schedule_c_line": null,
+      "category": null,
+      "deductible_pct": 100.0,
+      "confidence": 0.0,
+      "rationale": null,
+      "risk_level": "low",
+      "flags": [],
+      "deductible_amount": 0.0
+    },
+    {
+      "source": "receipt_cafe.png",
+      "profile": "receipt",
+      "date": "2025-04-11",
+      "vendor": "THE CORNER CAFE",
+      "description": "2 Lattes and Avocado Toast for a business meeting with a client",
+      "amount": 25.5,
+      "kind": "expense",
+      "payment_method": "CASH",
+      "raw": {
+        "vendor": "THE CORNER CAFE",
+        "date": "2025-04-11",
+        "total": 25.5,
+        "description": "2 Lattes and Avocado Toast for a business meeting with a client",
+        "payment_method": "CASH",
+        "currency": "USD",
+        "_line_code": "24b"
+      },
+      "schedule_c_line": "Line 24b - Deductible meals (50%)",
+      "category": "Deductible meals (50%)",
+      "deductible_pct": 50.0,
+      "confidence": 0.95,
+      "rationale": "Business meal with client, subject to 50% limitation.",
+      "risk_level": "medium",
+      "flags": [
+        "Audit-sensitive category: Meals"
+      ],
+      "deductible_amount": 12.75
+    },
+    {
+      "source": "receipt_office_depot.png",
+      "profile": "receipt",
+      "date": "2025-03-22",
+      "vendor": "OFFICE DEPOT #2241",
+      "description": "Printer Ink HP 952XL, Copy Paper 5-ream, and USB-C Hub",
+      "amount": 181.69,
+      "kind": "expense",
+      "payment_method": "VISA ****4412",
+      "raw": {
+        "vendor": "OFFICE DEPOT #2241",
+        "date": "2025-03-22",
+        "total": 181.69,
+        "description": "Printer Ink HP 952XL, Copy Paper 5-ream, and USB-C Hub",
+        "payment_method": "VISA ****4412",
+        "currency": "USD",
+        "_line_code": "22"
+      },
+      "schedule_c_line": "Line 22 - Supplies",
+      "category": "Supplies",
+      "deductible_pct": 100.0,
+      "confidence": 0.9,
+      "rationale": "Consumable office materials and minor accessories.",
+      "risk_level": "low",
+      "flags": [],
+      "deductible_amount": 181.69
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-01-15",
+      "vendor": "Adobe",
+      "description": "Creative Cloud subscription",
+      "amount": 59.99,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-01-15",
+        "vendor": "Adobe",
+        "description": "Creative Cloud subscription",
+        "amount": "59.99",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "18"
+      },
+      "schedule_c_line": "Line 18 - Office expense",
+      "category": "Office expense",
+      "deductible_pct": 100.0,
+      "confidence": 0.9,
+      "rationale": "Software subscription for business operations.",
+      "risk_level": "low",
+      "flags": [],
+      "deductible_amount": 59.99
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-02-03",
+      "vendor": "United Airlines",
+      "description": "Flight to client onsite SFO",
+      "amount": 412.4,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-02-03",
+        "vendor": "United Airlines",
+        "description": "Flight to client onsite SFO",
+        "amount": "412.40",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "24a"
+      },
+      "schedule_c_line": "Line 24a - Travel",
+      "category": "Travel",
+      "deductible_pct": 100.0,
+      "confidence": 0.95,
+      "rationale": "Airfare for business travel.",
+      "risk_level": "high",
+      "flags": [
+        "Audit-sensitive category: Travel",
+        "No supporting receipt for substantiation-required expense"
+      ],
+      "deductible_amount": 412.4
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-02-03",
+      "vendor": "Hyatt",
+      "description": "Hotel 2 nights client trip",
+      "amount": 388.0,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-02-03",
+        "vendor": "Hyatt",
+        "description": "Hotel 2 nights client trip",
+        "amount": "388.00",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "24a"
+      },
+      "schedule_c_line": "Line 24a - Travel",
+      "category": "Travel",
+      "deductible_pct": 100.0,
+      "confidence": 0.95,
+      "rationale": "Lodging incurred during business travel.",
+      "risk_level": "high",
+      "flags": [
+        "Audit-sensitive category: Travel",
+        "No supporting receipt for substantiation-required expense"
+      ],
+      "deductible_amount": 388.0
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-02-20",
+      "vendor": "Steakhouse 55",
+      "description": "Client dinner",
+      "amount": 240.0,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-02-20",
+        "vendor": "Steakhouse 55",
+        "description": "Client dinner",
+        "amount": "240.00",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "24b"
+      },
+      "schedule_c_line": "Line 24b - Deductible meals (50%)",
+      "category": "Deductible meals (50%)",
+      "deductible_pct": 50.0,
+      "confidence": 0.95,
+      "rationale": "Meal with client, subject to 50% deduction limit.",
+      "risk_level": "high",
+      "flags": [
+        "Audit-sensitive category: Meals",
+        "No supporting receipt for substantiation-required expense"
+      ],
+      "deductible_amount": 120.0
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-03-01",
+      "vendor": "WeWork",
+      "description": "Coworking desk monthly",
+      "amount": 350.0,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-03-01",
+        "vendor": "WeWork",
+        "description": "Coworking desk monthly",
+        "amount": "350.00",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "20b"
+      },
+      "schedule_c_line": "Line 20b - Rent/lease - other business property",
+      "category": "Rent/lease - other business property",
+      "deductible_pct": 100.0,
+      "confidence": 0.95,
+      "rationale": "Lease payment for business workspace.",
+      "risk_level": "low",
+      "flags": [],
+      "deductible_amount": 350.0
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-03-12",
+      "vendor": "Best Buy",
+      "description": "Laptop for business",
+      "amount": 2399.0,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-03-12",
+        "vendor": "Best Buy",
+        "description": "Laptop for business",
+        "amount": "2399.00",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "13"
+      },
+      "schedule_c_line": "Line 13 - Depreciation / Section 179",
+      "category": "Depreciation / Section 179",
+      "deductible_pct": 100.0,
+      "confidence": 0.9,
+      "rationale": "Capital asset eligible for Section 179 or depreciation.",
+      "risk_level": "medium",
+      "flags": [
+        "Audit-sensitive category: Depreciation/179"
+      ],
+      "deductible_amount": 2399.0
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-03-30",
+      "vendor": "Nordstrom",
+      "description": "New suit",
+      "amount": 650.0,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-03-30",
+        "vendor": "Nordstrom",
+        "description": "New suit",
+        "amount": "650.00",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "NONDEDUCTIBLE"
+      },
+      "schedule_c_line": "Line NONDEDUCTIBLE - Non-deductible / personal",
+      "category": "Non-deductible / personal",
+      "deductible_pct": 0.0,
+      "confidence": 0.95,
+      "rationale": "Ordinary clothing not suitable for everyday wear requirement not met.",
+      "risk_level": "high",
+      "flags": [
+        "Personal / non-deductible expense claimed"
+      ],
+      "deductible_amount": 0.0
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-04-05",
+      "vendor": "Acme Corp",
+      "description": "Project milestone payment",
+      "amount": 8500.0,
+      "kind": "income",
+      "payment_method": "ach",
+      "raw": {
+        "date": "2025-04-05",
+        "vendor": "Acme Corp",
+        "description": "Project milestone payment",
+        "amount": "8500.00",
+        "type": "income",
+        "payment": "ach"
+      },
+      "schedule_c_line": null,
+      "category": null,
+      "deductible_pct": 100.0,
+      "confidence": 0.0,
+      "rationale": null,
+      "risk_level": "low",
+      "flags": [],
+      "deductible_amount": 0.0
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-04-18",
+      "vendor": "Shell",
+      "description": "Gas - client site visits",
+      "amount": 300.0,
+      "kind": "expense",
+      "payment_method": "cash",
+      "raw": {
+        "date": "2025-04-18",
+        "vendor": "Shell",
+        "description": "Gas - client site visits",
+        "amount": "300.00",
+        "type": "expense",
+        "payment": "cash",
+        "_line_code": "9"
+      },
+      "schedule_c_line": "Line 9 - Car and truck expenses",
+      "category": "Car and truck expenses",
+      "deductible_pct": 100.0,
+      "confidence": 0.95,
+      "rationale": "Fuel costs for business use of vehicle.",
+      "risk_level": "high",
+      "flags": [
+        "Audit-sensitive category: Vehicle expense",
+        "No supporting receipt for substantiation-required expense",
+        "Cash payment >$200 (weak audit trail)"
+      ],
+      "deductible_amount": 300.0
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-05-02",
+      "vendor": "LegalZoom",
+      "description": "LLC filing + legal",
+      "amount": 299.0,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-05-02",
+        "vendor": "LegalZoom",
+        "description": "LLC filing + legal",
+        "amount": "299.00",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "17"
+      },
+      "schedule_c_line": "Line 17 - Legal and professional services",
+      "category": "Legal and professional services",
+      "deductible_pct": 100.0,
+      "confidence": 0.95,
+      "rationale": "Fees paid for legal services and entity formation.",
+      "risk_level": "low",
+      "flags": [],
+      "deductible_amount": 299.0
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-05-15",
+      "vendor": "Staples",
+      "description": "Office supplies",
+      "amount": 84.25,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-05-15",
+        "vendor": "Staples",
+        "description": "Office supplies",
+        "amount": "84.25",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "22"
+      },
+      "schedule_c_line": "Line 22 - Supplies",
+      "category": "Supplies",
+      "deductible_pct": 100.0,
+      "confidence": 0.95,
+      "rationale": "General consumable office items.",
+      "risk_level": "low",
+      "flags": [],
+      "deductible_amount": 84.25
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2025-06-01",
+      "vendor": "State Farm",
+      "description": "Business liability insurance",
+      "amount": 540.0,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2025-06-01",
+        "vendor": "State Farm",
+        "description": "Business liability insurance",
+        "amount": "540.00",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "15"
+      },
+      "schedule_c_line": "Line 15 - Insurance (other than health)",
+      "category": "Insurance (other than health)",
+      "deductible_pct": 100.0,
+      "confidence": 0.95,
+      "rationale": "Business liability coverage.",
+      "risk_level": "low",
+      "flags": [],
+      "deductible_amount": 540.0
+    },
+    {
+      "source": "transactions.csv",
+      "profile": "spreadsheet",
+      "date": "2024-12-28",
+      "vendor": "Verizon",
+      "description": "Phone bill (prior year)",
+      "amount": 95.0,
+      "kind": "expense",
+      "payment_method": "card",
+      "raw": {
+        "date": "2024-12-28",
+        "vendor": "Verizon",
+        "description": "Phone bill (prior year)",
+        "amount": "95.00",
+        "type": "expense",
+        "payment": "card",
+        "_line_code": "25"
+      },
+      "schedule_c_line": "Line 25 - Utilities",
+      "category": "Utilities",
+      "deductible_pct": 100.0,
+      "confidence": 0.9,
+      "rationale": "Business communication service bill.",
+      "risk_level": "high",
+      "flags": [
+        "Date outside tax year 2025"
+      ],
+      "deductible_amount": 95.0
+    }
+  ]
+}
