@@ -1,0 +1,8 @@
+# Keep the serverless bundle lean.
+**/__pycache__
+*.pyc
+.git
+scripts
+web/requirements-web.txt
+DEPLOY.md
+README.md

@@ -1,6 +1,16 @@
-# Core (required)
-openai>=1.40          # GMI Cloud / Respan OpenAI-compatible client
+# Runtime dependencies. This file also drives the Vercel Python function build,
+# so everything the deployed app imports at runtime must be listed here.
 
-# Optional
-openpyxl>=3.1         # only needed to ingest .xlsx spreadsheets
-pillow>=10.0          # only needed to generate demo sample images
+# Core
+openai>=1.40           # GMI Cloud / Respan OpenAI-compatible client
+fastapi>=0.110         # web API + static serving
+python-multipart>=0.0.9  # file uploads (POST /api/audit)
+
+# Optional ingest
+openpyxl>=3.1          # only needed to ingest .xlsx spreadsheets
+
+# Local dev only (Vercel provides its own ASGI server; unused there)
+uvicorn[standard]>=0.27
+
+# Sample-image generation only (scripts/make_samples.py)
+pillow>=10.0
