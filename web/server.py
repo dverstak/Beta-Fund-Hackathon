@@ -19,6 +19,7 @@ from pathlib import Path
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.concurrency import run_in_threadpool
 
 from . import adapter
 
@@ -56,7 +57,11 @@ async def post_audit(files: list[UploadFile] = File(default=[])):
 
         # No files uploaded -> demo against the bundled sample data folder.
         target = in_dir if any(in_dir.iterdir()) else (_ROOT / "data")
-        result = adapter.run_audit(target, out_dir)
+        # The audit pipeline is a long, blocking (network) call. Run it in a
+        # worker thread so the single uvicorn event loop stays responsive --
+        # otherwise the page, static assets, and /api/health all freeze while
+        # an audit is in flight.
+        result = await run_in_threadpool(adapter.run_audit, target, out_dir)
     return result
 
 
