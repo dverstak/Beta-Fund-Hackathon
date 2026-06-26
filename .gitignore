@@ -1,2 +1,9 @@
 #environment vairables
 .env
+
+# python build artifacts
+__pycache__/
+*.pyc
+
+# vercel
+.vercel
