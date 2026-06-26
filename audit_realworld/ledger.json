@@ -1,0 +1,52 @@
+{
+  "tax_year": 2025,
+  "summary": {
+    "documents": 1,
+    "line_items": 1,
+    "gross_receipts": 0,
+    "total_expenses_claimed": 110.0,
+    "total_deductible": 110.0,
+    "estimated_net_profit_schedule_c": -110.0,
+    "flagged_items": 1,
+    "high_risk_items": 1
+  },
+  "schedule_c_lines": {
+    "Line 18": {
+      "label": "Office expense",
+      "count": 1,
+      "claimed": 110.0,
+      "deductible": 110.0
+    }
+  },
+  "line_items": [
+    {
+      "source": "receipt_real1.jpg",
+      "profile": "receipt",
+      "date": "2015-07-11",
+      "vendor": "CLICKS",
+      "description": "Vodacom R110 Vodago pre-paid airtime voucher",
+      "amount": 110.0,
+      "kind": "expense",
+      "payment_method": null,
+      "raw": {
+        "vendor": "CLICKS",
+        "date": "2015-07-11",
+        "total": 110.0,
+        "description": "Vodacom R110 Vodago pre-paid airtime voucher",
+        "payment_method": null,
+        "currency": "ZAR",
+        "_line_code": "18"
+      },
+      "schedule_c_line": "Line 18 - Office expense",
+      "category": "Office expense",
+      "deductible_pct": 100.0,
+      "confidence": 0.75,
+      "rationale": "Mobile phone service typically classified as office expense; prepaid vouchers require substantiation of business use.",
+      "risk_level": "high",
+      "flags": [
+        "Date outside tax year 2025"
+      ],
+      "deductible_amount": 110.0
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "calls": 2,
+  "total_tokens": 3922,
+  "total_cost_usd": 0.000834,
+  "avg_cost_per_call_usd": 0.000417,
+  "respan_telemetry": {
+    "enabled": true,
+    "logs_sent": 2,
+    "log_errors": 0
+  },
+  "by_profile": {
+    "receipt": {
+      "docs": 1,
+      "prompt_tokens": 1176,
+      "completion_tokens": 343,
+      "cost_usd": 0.000255,
+      "latency_s": 19.438
+    },
+    "reasoning": {
+      "docs": 1,
+      "prompt_tokens": 711,
+      "completion_tokens": 1692,
+      "cost_usd": 0.000579,
+      "latency_s": 19.625
+    }
+  }
+}

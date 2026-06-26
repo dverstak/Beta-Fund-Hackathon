@@ -1,0 +1,53 @@
+{
+  "tax_year": 2025,
+  "summary": {
+    "documents": 1,
+    "line_items": 1,
+    "gross_receipts": 0,
+    "total_expenses_claimed": 0.32,
+    "total_deductible": 0.0,
+    "estimated_net_profit_schedule_c": 0.0,
+    "flagged_items": 1,
+    "high_risk_items": 1
+  },
+  "schedule_c_lines": {
+    "Line NONDEDUCTIBLE": {
+      "label": "Non-deductible / personal",
+      "count": 1,
+      "claimed": 0.32,
+      "deductible": 0.0
+    }
+  },
+  "line_items": [
+    {
+      "source": "receipts.webp",
+      "profile": "receipt",
+      "date": "2007-01-20",
+      "vendor": "PC Market of Choice",
+      "description": "Bananas",
+      "amount": 0.32,
+      "kind": "expense",
+      "payment_method": "cash",
+      "raw": {
+        "vendor": "PC Market of Choice",
+        "date": "2007-01-20",
+        "total": 0.32,
+        "description": "Bananas",
+        "payment_method": "cash",
+        "currency": "USD",
+        "_line_code": "NONDEDUCTIBLE"
+      },
+      "schedule_c_line": "Line NONDEDUCTIBLE - Non-deductible / personal",
+      "category": "Non-deductible / personal",
+      "deductible_pct": 0.0,
+      "confidence": 0.95,
+      "rationale": "Personal grocery purchase; insufficient evidence of business use.",
+      "risk_level": "high",
+      "flags": [
+        "Personal / non-deductible expense claimed",
+        "Date outside tax year 2025"
+      ],
+      "deductible_amount": 0.0
+    }
+  ]
+}
