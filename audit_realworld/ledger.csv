@@ -1,0 +1,2 @@
+source,profile,date,vendor,description,kind,amount,schedule_c_line,deductible_pct,deductible_amount,confidence,risk_level,flags
+receipt_real1.jpg,receipt,2015-07-11,CLICKS,Vodacom R110 Vodago pre-paid airtime voucher,expense,110.0,Line 18 - Office expense,100.0,110.0,0.75,high,Date outside tax year 2025
