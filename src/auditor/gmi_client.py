@@ -1,11 +1,12 @@
 """GMI Cloud client (OpenAI-compatible) with Respan metering baked in.
 
-All model traffic goes through here so every call is metered by profile. If a
-RESPAN_API_KEY is set, inference is routed through Respan's gateway.
+All model traffic goes through here so every call is metered by profile. When a
+RESPAN_API_KEY is set, every call is also logged to Respan's telemetry API.
 """
 from __future__ import annotations
 
 import base64
+import io
 import json
 import mimetypes
 import time
@@ -16,6 +17,31 @@ from openai import OpenAI
 
 from . import config
 from .respan import RespanMeter, RespanLogger
+
+# Receipts/forms don't need full camera resolution to OCR. Downscaling the long
+# edge to this before upload cuts payload size, vision tokens, and latency
+# dramatically (a 5312px phone photo -> 1600px) with no accuracy loss.
+_MAX_IMAGE_EDGE = 1600
+
+
+def _encode_image(image_path: Path) -> tuple[str, str]:
+    """Return (mime, base64). Downscale large images via Pillow when available;
+    fall back to the raw bytes if Pillow is missing or the file isn't an image
+    we can open."""
+    raw = image_path.read_bytes()
+    mime = mimetypes.guess_type(str(image_path))[0] or "image/png"
+    try:
+        from PIL import Image  # optional dependency
+        with Image.open(io.BytesIO(raw)) as img:
+            if max(img.size) <= _MAX_IMAGE_EDGE:
+                return mime, base64.b64encode(raw).decode()
+            img = img.convert("RGB")
+            img.thumbnail((_MAX_IMAGE_EDGE, _MAX_IMAGE_EDGE))
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=80)
+            return "image/jpeg", base64.b64encode(buf.getvalue()).decode()
+    except Exception:  # noqa: BLE001 — never let preprocessing break extraction
+        return mime, base64.b64encode(raw).decode()
 
 
 class GMIClient:
@@ -50,9 +76,7 @@ class GMIClient:
     # ---- vision: parse a receipt / 1099 image or PDF page ----
     def extract_from_image(self, profile: str, image_path: Path,
                            instruction: str, schema_hint: str) -> dict:
-        data = image_path.read_bytes()
-        mime = mimetypes.guess_type(str(image_path))[0] or "image/png"
-        b64 = base64.b64encode(data).decode()
+        mime, b64 = _encode_image(image_path)
         messages = [
             {"role": "system", "content":
                 "You are a meticulous bookkeeping OCR/extraction engine. "

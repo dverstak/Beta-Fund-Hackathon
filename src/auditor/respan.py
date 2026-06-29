@@ -1,18 +1,21 @@
 """Respan-style observability: per-document-profile token & cost metering.
 
 Respan is the sponsor LLM-engineering platform (observability + AI gateway).
-When a RESPAN_API_KEY is configured we route inference through Respan's
-OpenAI-compatible gateway so spend is tracked centrally. Either way we keep a
-local meter so the auditor can prove per-document cost-efficiency at high
-volume -- the core value prop for batch tax auditing.
+When a RESPAN_API_KEY is configured, every GMI call is logged to Respan's
+telemetry API tagged by document profile so spend is tracked centrally. We also
+keep a local meter so the auditor can prove per-document cost-efficiency at high
+volume -- the core value prop for batch tax auditing. Telemetry is sent off the
+critical path (background threads) and never blocks or breaks the audit.
 """
 from __future__ import annotations
 
 import json
+import threading
 import time
 import urllib.request
 import urllib.error
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -51,11 +54,14 @@ class RespanLogger:
         self.enabled = bool(api_key)
         self.sent = 0
         self.errors = 0
+        self._lock = threading.Lock()
+        # Small pool so telemetry POSTs run off the audit's critical path.
+        self._pool = ThreadPoolExecutor(max_workers=2) if self.enabled else None
 
     def log(self, *, profile: str, model: str, prompt_tokens: int,
             completion_tokens: int, cost: float, latency_s: float,
             prompt_messages: list, completion_text: str) -> None:
-        if not self.enabled:
+        if not self.enabled or self._pool is None:
             return
         payload = {
             "model": model,
@@ -68,7 +74,10 @@ class RespanLogger:
             "customer_identifier": profile,            # per-profile dimension
             "metadata": {"document_profile": profile, "app": "contractor-tax-auditor"},
         }
-        data = json.dumps(payload).encode()
+        # Fire-and-forget: submit and return immediately.
+        self._pool.submit(self._send, json.dumps(payload).encode())
+
+    def _send(self, data: bytes) -> None:
         req = urllib.request.Request(
             self.url, data=data, method="POST",
             headers={"Authorization": f"Bearer {self.api_key}",
@@ -76,9 +85,17 @@ class RespanLogger:
         try:
             with urllib.request.urlopen(req, timeout=10) as r:
                 r.read()
+            with self._lock:
                 self.sent += 1
         except (urllib.error.URLError, TimeoutError, OSError):
-            self.errors += 1
+            with self._lock:
+                self.errors += 1
+
+    def flush(self) -> None:
+        """Wait for in-flight telemetry POSTs to finish (called once at end)."""
+        if self._pool is not None:
+            self._pool.shutdown(wait=True)
+            self._pool = None
 
 
 def _redact(messages: list) -> list:
@@ -122,6 +139,12 @@ class RespanMeter:
                             latency_s=latency_s, prompt_messages=prompt_messages,
                             completion_text=completion_text)
         return rec
+
+    def flush(self) -> None:
+        """Block until queued telemetry has been delivered (for accurate
+        logs_sent counts and to avoid losing logs at process exit)."""
+        if self.logger is not None:
+            self.logger.flush()
 
     # ---- aggregates ----
     def summary(self) -> dict:

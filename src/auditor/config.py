@@ -25,8 +25,24 @@ def _load_env() -> None:
 _load_env()
 
 # --- GMI Cloud (OpenAI-compatible inference) ---
-GMI_API_KEY = os.environ.get("GMI_API_KEY", "")
-GMI_BASE_URL = os.environ.get("GMI_BASE_URL", "https://api.gmi-serving.com/v1")
+# On GMI AgentBox the platform auto-injects GMI_MAAS_API_KEY and
+# GMI_MAAS_BASE_URL (the base URL has NO trailing /v1). Locally we use
+# GMI_API_KEY / GMI_BASE_URL. Accept both, preferring the AgentBox names.
+GMI_API_KEY = (os.environ.get("GMI_MAAS_API_KEY")
+               or os.environ.get("GMI_API_KEY", ""))
+
+
+def _normalize_base_url() -> str:
+    raw = (os.environ.get("GMI_MAAS_BASE_URL")
+           or os.environ.get("GMI_BASE_URL")
+           or "https://api.gmi-serving.com/v1").rstrip("/")
+    # The OpenAI-compatible client needs the /v1 suffix; AgentBox omits it.
+    if not raw.endswith("/v1"):
+        raw += "/v1"
+    return raw
+
+
+GMI_BASE_URL = _normalize_base_url()
 
 # Multimodal model for parsing chaotic receipts / 1099 scans.
 VISION_MODEL = os.environ.get("GMI_VISION_MODEL", "google/gemini-3-flash-preview")

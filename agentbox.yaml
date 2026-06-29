@@ -22,24 +22,37 @@ capabilities:
 
 pipeline: [ingest, vision-extract, categorize, risk-flag, ledger]
 
-entrypoint:
-  type: cli
+# Deployed on AgentBox (GMI CE path) as a containerized HTTP service.
+deployment:
+  type: http-service
+  image: "ghcr.io/<owner>/contractor-tax-auditor:latest"
+  port: 8080                      # AgentBox maps external 443 -> internal 8080
+  healthcheck: "GET /api/health"
+  endpoints:
+    - "GET  /                 dashboard UI"
+    - "POST /api/jobs         submit documents -> 202 {job_id} (async)"
+    - "GET  /api/jobs/{id}    poll job status + ledger result"
+    - "GET  /api/ledger       latest ledger"
+  long_running: "async job pattern (submit + poll) to avoid gateway 504s"
+  env:
+    GMI_MAAS_API_KEY: "auto-injected by AgentBox (inference)"
+    GMI_MAAS_BASE_URL: "auto-injected by AgentBox"
+    RESPAN_API_KEY: "secret (optional, enables Respan telemetry)"
+    GMI_VISION_MODEL: "text (optional model override)"
+    GMI_REASONING_MODEL: "text (optional model override)"
+
+# Also runnable as a CLI for local/batch use.
+cli:
   command: "python -m auditor.cli audit {input} --out {output}"
-  inputs:
-    input: { type: path, description: "Folder of spreadsheets, receipts, 1099s" }
-  outputs:
-    - ledger.json
-    - ledger.csv
-    - audit_report.md
-    - respan_metrics.json
+  outputs: [ledger.json, ledger.csv, audit_report.md, respan_metrics.json]
 
 sponsor_tools:
   gmi_cloud:
-    role: "Multimodal vision inference (receipt/PDF parsing)"
+    role: "Multimodal vision + reasoning inference (receipt/PDF parsing, Schedule C)"
     base_url: "https://api.gmi-serving.com/v1"
     model_env: GMI_VISION_MODEL
   respan:
-    role: "Per-document token & cost observability / AI gateway"
+    role: "Per-document-profile token & cost observability (telemetry logging)"
     metric: "cost per document profile"
   agentbox:
     role: "Marketplace distribution to freelancers & SMBs"

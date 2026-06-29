@@ -1,12 +1,17 @@
 """Orchestrate: ingest -> vision-extract -> categorize -> risk-flag -> ledger."""
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from . import ingest, extract, categorize as categ, risk, ledger as ledger_mod
 from .gmi_client import GMIClient
 from .models import LineItem
 from .respan import RespanMeter
+
+# Vision extraction is network-bound; run documents concurrently so a shoebox
+# of receipts isn't a serial chain of round-trips.
+_EXTRACT_WORKERS = 6
 
 
 def run(input_path: Path, out_dir: Path, verbose: bool = True) -> dict:
@@ -22,18 +27,25 @@ def run(input_path: Path, out_dir: Path, verbose: bool = True) -> dict:
     log(f"[ingest] {len(docs)} document(s) discovered "
         f"(inference: GMI Cloud | observability: {client.observability})")
 
-    # 2. extract
+    # 2. extract -- spreadsheets locally, images concurrently via GMI vision
     items: list[LineItem] = []
-    for path, profile in docs:
-        try:
-            if profile == "spreadsheet":
-                new = extract.extract_spreadsheet(path)
-            else:
-                new = extract.extract_image(client, path, profile)
-            items.extend(new)
-            log(f"[extract] {path.name} ({profile}) -> {len(new)} line item(s)")
-        except Exception as e:  # noqa: BLE001 - keep batch resilient
-            log(f"[extract] ERROR {path.name}: {e}")
+
+    def _extract_one(path: Path, profile: str) -> list[LineItem]:
+        if profile == "spreadsheet":
+            return extract.extract_spreadsheet(path)
+        return extract.extract_image(client, path, profile)
+
+    with ThreadPoolExecutor(max_workers=_EXTRACT_WORKERS) as pool:
+        futures = {pool.submit(_extract_one, p, prof): (p, prof)
+                   for p, prof in docs}
+        for fut in futures:
+            path, profile = futures[fut]
+            try:
+                new = fut.result()
+                items.extend(new)
+                log(f"[extract] {path.name} ({profile}) -> {len(new)} line item(s)")
+            except Exception as e:  # noqa: BLE001 - keep batch resilient
+                log(f"[extract] ERROR {path.name}: {e}")
 
     # 3. categorize (expenses)
     log(f"[categorize] mapping {sum(1 for i in items if i.kind=='expense')} "
@@ -49,6 +61,8 @@ def run(input_path: Path, out_dir: Path, verbose: bool = True) -> dict:
     # 5. ledger
     ledger = ledger_mod.build(items)
     paths = ledger_mod.write_all(ledger, items, out_dir)
+    # Drain background telemetry so logs_sent counts are accurate.
+    meter.flush()
     meter.write_report(out_dir / "respan_metrics.json")
     paths["respan_metrics"] = str(out_dir / "respan_metrics.json")
 
