@@ -16,12 +16,12 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile, File
+from fastapi import Depends, FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 
-from . import adapter
+from . import adapter, auth
 
 _HERE = Path(__file__).resolve().parent
 _STATIC = _HERE / "static"
@@ -35,8 +35,14 @@ def health():
     return {"status": "ok", "backend_available": adapter.backend_available()}
 
 
+@app.get("/api/clerk-config")
+def clerk_config():
+    """Public: non-secret values the browser needs to boot Clerk JS."""
+    return auth.public_config()
+
+
 @app.get("/api/ledger")
-def get_ledger():
+def get_ledger(user_id: str = Depends(auth.require_user)):
     data = adapter.latest_ledger()
     if data is None:
         return JSONResponse({"error": "no ledger found"}, status_code=404)
@@ -44,7 +50,10 @@ def get_ledger():
 
 
 @app.post("/api/audit")
-async def post_audit(files: list[UploadFile] = File(default=[])):
+async def post_audit(
+    files: list[UploadFile] = File(default=[]),
+    user_id: str = Depends(auth.require_user),
+):
     """Accept uploaded documents, run the audit, return the ledger."""
     with tempfile.TemporaryDirectory(prefix="shoebox_") as tmp:
         in_dir = Path(tmp) / "in"
@@ -71,6 +80,8 @@ app.mount("/static", StaticFiles(directory=str(_STATIC)), name="static")
 
 @app.get("/")
 def index():
+    # Served to everyone; the browser-side Clerk gate (clerk-gate.js) redirects
+    # signed-out visitors to the hosted sign-in page and only then boots the app.
     return FileResponse(str(_STATIC / "index.html"))
 
 

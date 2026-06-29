@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-clerk-loading>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/styles.css" />
+  <!-- Hide the app until the Clerk gate confirms the visitor is signed in. -->
+  <style>html[data-clerk-loading] body { visibility: hidden; }</style>
+  <script defer src="/static/clerk-gate.js"></script>
 </head>
 <body>
   <!-- ░░ MASTHEAD ░░ -->
@@ -174,6 +177,6 @@
     <div class="drawer-panel" id="drawerPanel"></div>
   </div>
 
-  <script src="/static/app.js"></script>
+  <!-- app.js is injected by clerk-gate.js once authentication is established. -->
 </body>
 </html>
